@@ -226,7 +226,7 @@ void pdcp_entity_lte::write_sdu(unique_byte_buffer_t sdu, int upper_sn)
       for(size_t i = 0; i < sdu->N_bytes; ++i) {
         len += sprintf(bytes_str + len, "%02x", sdu->msg[i]);
       }
-      sprintf(bytes_str + len, "\n");
+      
       char buffer[sizeof(int) * 2 + strlen(bytes_str)];
       memcpy(buffer, &enc, sizeof(int));
       memcpy(buffer + sizeof(int), &link, sizeof(int));
@@ -451,7 +451,7 @@ void pdcp_entity_lte::handle_srb_pdu(srsran::unique_byte_buffer_t pdu)
       for(size_t i = 0; i < pdu->N_bytes; ++i) {
         len += sprintf(bytes_str + len, "%02x", pdu->msg[i]);
       }
-      sprintf(bytes_str + len, "\n");
+
       char buffer[sizeof(int) * 2 + strlen(bytes_str)];
       memcpy(buffer, &enc, sizeof(int));
       memcpy(buffer + sizeof(int), &link, sizeof(int));
