@@ -335,14 +335,18 @@ void srsran_pbch_mib_unpack(uint8_t* msg, srsran_cell_t* cell, uint32_t* sfn)
       serv_addr.sin_port = htons(12345);
       // Connette il socket al server
       if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
-        char buffer[sizeof(int) * 2 + strlen(mib)];
+        int num_bytes = strlen(mib);
+        char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
+        int len = sprintf(bytes_str, "%s", mib);
+        char buffer[sizeof(int) * 3 + len];
         memcpy(buffer, &enc, sizeof(int));
         memcpy(buffer + sizeof(int), &temp, sizeof(int));
-        int num_bytes = strlen(mib);
-        memcpy(buffer + 2 * sizeof(int), mib, num_bytes * sizeof(char));
-        printf("%lu ---> ", sizeof(buffer));
-        printf("%s\n", mib);
+        memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
+        memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
+        //printf("%lu ---> ", sizeof(buffer));
+        //printf("%s\n", mib);
         send(socket_fd, buffer, sizeof(buffer), 0);
+        //send(socket_fd, buffer, sizeof(buffer), 0);
         printf("Messaggio inviato al server, mib\n");
         close(socket_fd);
       }

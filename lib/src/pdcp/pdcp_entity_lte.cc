@@ -218,7 +218,7 @@ void pdcp_entity_lte::write_sdu(unique_byte_buffer_t sdu, int upper_sn)
     if (socketfd != -1){
       printf("Mando messsaggi al programma python: %d\n", socketfd);
       // Allocazione della stringa
-      char* bytes_str = (char*)malloc(sizeof(char) * (2 * sdu->N_bytes + 2));
+      char* bytes_str = (char*)malloc(sizeof(char) * (2 * sdu->N_bytes + 3));
 
       // Scrive i bytes nella stringa
       int len = sprintf(bytes_str, "%s", "");
@@ -226,23 +226,18 @@ void pdcp_entity_lte::write_sdu(unique_byte_buffer_t sdu, int upper_sn)
       for(size_t i = 0; i < sdu->N_bytes; ++i) {
         len += sprintf(bytes_str + len, "%02x", sdu->msg[i]);
       }
-      
-      char buffer[sizeof(int) * 2 + strlen(bytes_str)];
+
+      //printf("%s\n", bytes_str);
+
+      char buffer[sizeof(int) * 3 + strlen(bytes_str)];
       memcpy(buffer, &enc, sizeof(int));
       memcpy(buffer + sizeof(int), &link, sizeof(int));
-      int num_bytes = strlen(bytes_str);
-      memcpy(buffer + 2 * sizeof(int), bytes_str, num_bytes * sizeof(char));
-      printf("%lu ---> ", sizeof(buffer));
-      printf("%s\n", bytes_str);
+      memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
+      memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
+      // printf("%lu ---> ", sizeof(buffer));
+      // printf("%s\n", bytes_str);
+      //send(socketfd, buffer, sizeof(bytes_str), 0);
       send(socketfd, buffer, sizeof(buffer), 0);
-      // Ricezione dell'ACK
-      char ack_buffer[1024];
-      ssize_t bytes_received = recv(socketfd, ack_buffer, sizeof(ack_buffer), 0);
-      if (bytes_received == -1) {
-        perror("recv");
-        exit(1);
-      }
-
       free(bytes_str);
       
     }
@@ -444,30 +439,27 @@ void pdcp_entity_lte::handle_srb_pdu(srsran::unique_byte_buffer_t pdu)
     if (socketfd != -1){
       printf("Mando messsaggi al programma python: %d\n", socketfd);
       // Allocazione della stringa
-      char* bytes_str = (char*)malloc(sizeof(char) * (2 * pdu->N_bytes + 2));
+      char* bytes_str = (char*)malloc(sizeof(char) * (2 * pdu->N_bytes + 3));
 
       // Scrive i bytes nella stringa
       int len = sprintf(bytes_str, "%s", "");
       for(size_t i = 0; i < pdu->N_bytes; ++i) {
         len += sprintf(bytes_str + len, "%02x", pdu->msg[i]);
       }
-
-      char buffer[sizeof(int) * 2 + strlen(bytes_str)];
+      //printf("%s\n", bytes_str);
+      char buffer[sizeof(int) * 3 + strlen(bytes_str)];
       memcpy(buffer, &enc, sizeof(int));
       memcpy(buffer + sizeof(int), &link, sizeof(int));
-      printf("\n%d-%d\n", enc, link);
-      int num_bytes = strlen(bytes_str);
-      memcpy(buffer + 2 * sizeof(int), bytes_str, num_bytes * sizeof(char));
-      printf("%lu ---> ", sizeof(buffer));
-      printf("%s\n", bytes_str);
+      memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
+      memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));    
       send(socketfd, buffer, sizeof(buffer), 0);
       // Ricezione dell'ACK
-      char ack_buffer[1024];
-      ssize_t bytes_received = recv(socketfd, ack_buffer, sizeof(ack_buffer), 0);
-      if (bytes_received == -1) {
-        perror("recv");
-        exit(1);
-      }
+      // char ack_buffer[1024];
+      // ssize_t bytes_received = recv(socketfd, ack_buffer, sizeof(ack_buffer), 0);
+      // if (bytes_received == -1) {
+      //   perror("recv");
+      //   exit(1);
+      // }
 
       free(bytes_str);
     }

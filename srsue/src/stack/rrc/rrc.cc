@@ -1456,13 +1456,15 @@ void rrc::handle_sib1()
     serv_addr.sin_port = htons(12345);
     // Connette il socket al server
     if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
-      char buffer[sizeof(int) * 2 + strlen(jw.to_string().c_str())];
+      int num_bytes = strlen(jw.to_string().c_str());
+      char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
+      int len = sprintf(bytes_str, "%s", jw.to_string().c_str());
+      char buffer[sizeof(int) * 3 + len];
       memcpy(buffer, &enc, sizeof(int));
       memcpy(buffer + sizeof(int), &temp, sizeof(int));
-      int num_bytes = strlen(jw.to_string().c_str());
-      memcpy(buffer + 2 * sizeof(int), jw.to_string().c_str(), num_bytes * sizeof(char));
-      printf("%lu ---> ", sizeof(buffer));
-      printf("%s\n", jw.to_string().c_str());
+      memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
+      memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
+      
       send(socket_fd, buffer, sizeof(buffer), 0);
       printf("Messaggio inviato al server, sib1\n");
       close(socket_fd);
@@ -1528,16 +1530,18 @@ void rrc::handle_sib2()
       serv_addr.sin_port = htons(12345);
       // Connette il socket al server
       if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
-        char buffer[sizeof(int) * 2 + strlen(jw.to_string().c_str())* sizeof(char)];
+        int num_bytes = strlen(jw.to_string().c_str());
+        char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
+        int len = sprintf(bytes_str, "%s", jw.to_string().c_str());
+        char buffer[sizeof(int) * 3 + len];
         memcpy(buffer, &enc, sizeof(int));
         memcpy(buffer + sizeof(int), &temp, sizeof(int));
-        int num_bytes = strlen(jw.to_string().c_str());
-        memcpy(buffer + 2 * sizeof(int), jw.to_string().c_str(), num_bytes * sizeof(char));
-        printf("%lu ---> ", sizeof(buffer));
-        printf("%s\n", jw.to_string().c_str());
-        ssize_t test = send(socket_fd, buffer, sizeof(buffer), 0);
+        memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
+        memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
         
-        printf("Messaggio inviato al server, sib2: %lu\n", test);
+        send(socket_fd, buffer, sizeof(buffer), 0);
+        
+        printf("Messaggio inviato al server, sib2");
         close(socket_fd);
       }
   }
@@ -1602,7 +1606,7 @@ void rrc::handle_sib3()
   cell_resel_cfg.q_hyst = sib3->cell_resel_info_common.q_hyst.to_number();
 
   /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   * Author: Matteo Chiacchia
+   * Author:  Matteo Chiacchia
   */
   json_writer jw;
   sib3->to_json(jw);
@@ -1620,13 +1624,15 @@ void rrc::handle_sib3()
     serv_addr.sin_port = htons(12345);
     // Connette il socket al server
       if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
-        char buffer[sizeof(int) * 2 + strlen(jw.to_string().c_str())];
+        int num_bytes = strlen(jw.to_string().c_str());
+        char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
+        int len = sprintf(bytes_str, "%s", jw.to_string().c_str());
+        char buffer[sizeof(int) * 3 + len];
         memcpy(buffer, &enc, sizeof(int));
         memcpy(buffer + sizeof(int), &temp, sizeof(int));
-        int num_bytes = strlen(jw.to_string().c_str());
-        memcpy(buffer + 2 * sizeof(int), jw.to_string().c_str(), num_bytes * sizeof(char));
-        printf("%lu ---> ", sizeof(buffer));
-        printf("%s\n", jw.to_string().c_str());
+        memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
+        memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
+        
         send(socket_fd, buffer, sizeof(buffer), 0);
         printf("Messaggio inviato al server, sib3\n");
         close(socket_fd);
