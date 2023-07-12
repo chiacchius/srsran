@@ -78,6 +78,7 @@ void nas_pcap::write_nas(uint8_t* pdu, uint32_t pdu_len_bytes)
   if (enable_write) {
     NAS_Context_Info_t context;
     if (pdu) {
+      
       LTE_PCAP_NAS_WritePDU(pcap_file, &context, pdu, pdu_len_bytes);
     }
   }

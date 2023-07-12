@@ -60,6 +60,8 @@ void pdcp_entity_base::integrity_generate(uint8_t* msg, uint32_t msg_len, uint32
     k_int = sec_cfg.k_up_int.data();
   }
 
+ 
+
   switch (sec_cfg.integ_algo) {
     case INTEGRITY_ALGORITHM_ID_EIA0:
       break;
@@ -97,6 +99,7 @@ bool pdcp_entity_base::integrity_verify(uint8_t* msg, uint32_t msg_len, uint32_t
   } else {
     k_int = sec_cfg.k_up_int.data();
   }
+
 
   switch (sec_cfg.integ_algo) {
     case INTEGRITY_ALGORITHM_ID_EIA0:
@@ -146,13 +149,15 @@ void pdcp_entity_base::cipher_encrypt(uint8_t* msg, uint32_t msg_len, uint32_t c
   } else {
     k_enc = sec_cfg.k_up_enc.data();
   }
-
+  
   logger.debug("Cipher encrypt input: COUNT: %" PRIu32 ", Bearer ID: %d, Direction %s",
                count,
                cfg.bearer_id,
                cfg.tx_direction == SECURITY_DIRECTION_DOWNLINK ? "Downlink" : "Uplink");
   logger.debug(k_enc, 32, "Cipher encrypt key:");
   logger.debug(msg, msg_len, "Cipher encrypt input msg");
+  
+  
 
   switch (sec_cfg.cipher_algo) {
     case CIPHERING_ALGORITHM_ID_EEA0:

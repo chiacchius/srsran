@@ -523,7 +523,18 @@ void nas::write_pdu(uint32_t lcid, unique_byte_buffer_t pdu)
         return;
     }
   }
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+  */
+  
+  printf("NAS message bytes\n");
+  //printf("BYTES: %d\n", pdu->N_bytes);
+  for(size_t i = 0; i < (pdu->N_bytes); ++i) {
+        printf("%02x ", (unsigned char)pdu->msg[i]);
+  }
+  printf("\n");
 
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++*/
   // Reserved for Security Mode Command (Sec 9.3.1)
   if (sec_hdr_type == LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY_WITH_NEW_EPS_SECURITY_CONTEXT &&
       msg_type != LIBLTE_MME_MSG_TYPE_SECURITY_MODE_COMMAND) {
@@ -592,6 +603,18 @@ void nas::write_pdu(uint32_t lcid, unique_byte_buffer_t pdu)
       return;
   }
 }
+
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+  */
+void nas::uplink_message_hook(uint8_t *msg, uint32_t N_bytes){
+  
+  return;
+};
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
+
 
 void nas::set_k_enb_count(uint32_t count)
 {
@@ -1250,7 +1273,7 @@ void nas::parse_security_mode_command(uint32_t lcid, unique_byte_buffer_t pdu)
   if (pcap != nullptr) {
     pcap->write_nas(pdu->msg, pdu->N_bytes);
   }
-
+  
   if (apply_security_config(pdu, current_sec_hdr)) {
     logger.error("Error applying NAS security.");
     return;
@@ -1607,6 +1630,13 @@ void nas::gen_attach_request(srsran::unique_byte_buffer_t& msg)
     // According to Sec 4.4.5, the attach request is always unciphered, even if a context exists
     liblte_mme_pack_attach_request_msg(
         &attach_req, LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY, ctxt_base.tx_count, (LIBLTE_BYTE_MSG_STRUCT*)msg.get());
+    
+     /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    * Author: Matteo Chiacchia
+    */
+    uplink_message_hook(msg->msg, msg->N_bytes);
+    /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
 
     if (apply_security_config(msg, LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY)) {
       logger.error("Error applying NAS security.");
@@ -1732,6 +1762,11 @@ void nas::send_security_mode_reject(uint8_t cause)
   LIBLTE_MME_SECURITY_MODE_REJECT_MSG_STRUCT sec_mode_rej = {0};
   sec_mode_rej.emm_cause                                  = cause;
   liblte_mme_pack_security_mode_reject_msg(&sec_mode_rej, (LIBLTE_BYTE_MSG_STRUCT*)msg.get());
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+  */
+  uplink_message_hook(msg->msg, msg->N_bytes);
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   if (pcap != nullptr) {
     pcap->write_nas(msg->msg, msg->N_bytes);
   }
@@ -1840,6 +1875,7 @@ void nas::send_attach_complete(const uint8_t& transaction_id_, const uint8_t& ep
 
   // Pack entire message
   unique_byte_buffer_t pdu = srsran::make_byte_buffer();
+
   if (pdu == nullptr) {
     logger.error("Couldn't allocate PDU in %s().", __FUNCTION__);
     return;
@@ -1850,6 +1886,11 @@ void nas::send_attach_complete(const uint8_t& transaction_id_, const uint8_t& ep
   if (pcap != nullptr) {
     pcap->write_nas(pdu->msg, pdu->N_bytes);
   }
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+  */
+  uplink_message_hook(pdu->msg, pdu->N_bytes);
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
   if (apply_security_config(pdu, current_sec_hdr)) {
     logger.error("Error applying NAS security.");
@@ -1880,6 +1921,11 @@ void nas::send_detach_accept()
   if (pcap != nullptr) {
     pcap->write_nas(pdu->msg, pdu->N_bytes);
   }
+ /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+  */
+  uplink_message_hook(pdu->msg, pdu->N_bytes);
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
   if (apply_security_config(pdu, current_sec_hdr)) {
     logger.error("Error applying NAS security.");
@@ -1910,7 +1956,11 @@ void nas::send_authentication_response(const uint8_t* res, const size_t res_len)
   if (pcap != nullptr) {
     pcap->write_nas(pdu->msg, pdu->N_bytes);
   }
-
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+  */
+  uplink_message_hook(pdu->msg, pdu->N_bytes);
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   if (apply_security_config(pdu, current_sec_hdr)) {
     logger.error("Error applying NAS security.");
     return;
@@ -1979,7 +2029,11 @@ void nas::send_identity_response(const uint8 id_type)
 
   liblte_mme_pack_identity_response_msg(
       &id_resp, current_sec_hdr, ctxt_base.tx_count, (LIBLTE_BYTE_MSG_STRUCT*)pdu.get());
-
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+  */
+  uplink_message_hook(pdu->msg, pdu->N_bytes);
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   // add security if needed
   if (apply_security_config(pdu, current_sec_hdr)) {
     logger.error("Error applying NAS security.");
@@ -2131,6 +2185,12 @@ void nas::send_esm_information_response(const uint8 proc_transaction_id)
   if (pcap != nullptr) {
     pcap->write_nas(pdu->msg, pdu->N_bytes);
   }
+  
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  * Author: Matteo Chiacchia
+  */
+  uplink_message_hook(pdu->msg, pdu->N_bytes);
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
   if (apply_security_config(pdu, current_sec_hdr)) {
     logger.error("Error applying NAS security.");
@@ -2167,6 +2227,11 @@ void nas::send_activate_dedicated_eps_bearer_context_accept(const uint8_t& proc_
   if (pcap != nullptr) {
     pcap->write_nas(pdu->msg, pdu->N_bytes);
   }
+ /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+  */
+  uplink_message_hook(pdu->msg, pdu->N_bytes);
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
   if (apply_security_config(pdu, current_sec_hdr)) {
     logger.error("Error applying NAS security.");
@@ -2206,6 +2271,14 @@ void nas::send_deactivate_eps_bearer_context_accept(const uint8_t& proc_transact
     pcap->write_nas(pdu->msg, pdu->N_bytes);
   }
 
+ /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+  */
+  uplink_message_hook(pdu->msg, pdu->N_bytes);
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
+
   if (apply_security_config(pdu, current_sec_hdr)) {
     logger.error("Error applying NAS security.");
     return;
@@ -2243,6 +2316,11 @@ void nas::send_modify_eps_bearer_context_accept(const uint8_t& proc_transaction_
   if (pcap != nullptr) {
     pcap->write_nas(pdu->msg, pdu->N_bytes);
   }
+ /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+  */
+  uplink_message_hook(pdu->msg, pdu->N_bytes);
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
   if (apply_security_config(pdu, current_sec_hdr)) {
     logger.error("Error applying NAS security.");
@@ -2276,6 +2354,11 @@ void nas::send_activate_test_mode_complete()
   if (pcap != nullptr) {
     pcap->write_nas(pdu->msg, pdu->N_bytes);
   }
+ /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+  */
+  uplink_message_hook(pdu->msg, pdu->N_bytes);
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
   if (apply_security_config(pdu, current_sec_hdr)) {
     logger.error("Error applying NAS security.");
@@ -2305,6 +2388,14 @@ void nas::send_close_ue_test_loop_complete()
   if (pcap != nullptr) {
     pcap->write_nas(pdu->msg, pdu->N_bytes);
   }
+
+ /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+  */
+  uplink_message_hook(pdu->msg, pdu->N_bytes);
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
 
   if (apply_security_config(pdu, current_sec_hdr)) {
     logger.error("Error applying NAS security.");
@@ -2503,5 +2594,6 @@ std::string nas::emm_info_str(LIBLTE_MME_EMM_INFORMATION_MSG_STRUCT* info)
   }
   return ss.str();
 }
+
 
 } // namespace srsue

@@ -74,7 +74,7 @@ public:
   uint32_t get_ipv4_addr() override;
   bool     get_ipv6_addr(uint8_t* ipv6_addr) override;
   void     plmn_search_completed(const found_plmn_t found_plmns[MAX_FOUND_PLMNS], int nof_plmns) final;
-
+  
   // Stack interface
   bool switch_on();
   bool switch_off();
@@ -215,7 +215,11 @@ private:
   void send_modify_eps_bearer_context_accept(const uint8_t& proc_transaction_id, const uint8_t& eps_bearer_id);
   void send_activate_test_mode_complete();
   void send_close_ue_test_loop_complete();
-
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+  */
+  void uplink_message_hook(uint8_t *msg, uint32_t N_bytes);
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   // Airplane mode simulator helpers
   void start_airplane_mode_sim();
   void airplane_mode_sim_switch_off();

@@ -1,0 +1,298 @@
+{
+	"artifacts" : 
+	[
+		{
+			"path" : "srsue/src/phy/test/nr_cell_search_test"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_executable",
+			"target_link_libraries",
+			"add_definitions",
+			"include_directories"
+		],
+		"files" : 
+		[
+			"srsue/src/phy/test/CMakeLists.txt",
+			"CMakeLists.txt",
+			"srsue/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 57,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 58,
+				"parent" : 0
+			},
+			{
+				"file" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 130,
+				"parent" : 3
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 254,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 1,
+				"line" : 645,
+				"parent" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 1,
+				"line" : 646,
+				"parent" : 3
+			},
+			{
+				"file" : 2
+			},
+			{
+				"command" : 3,
+				"file" : 2,
+				"line" : 31,
+				"parent" : 8
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : " -Wall -Wno-comment -Wno-reorder -Wno-unused-variable -Wtype-limits -std=c++14 -fno-strict-aliasing -Wno-unused-but-set-variable -march=native -mfpmath=sse -mavx2 -DLV_HAVE_AVX2 -DLV_HAVE_AVX -DLV_HAVE_SSE -ggdb -O0 -DDEBUG_MODE -DBUILD_TYPE_DEBUG -Werror -g -fPIE  "
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 4,
+					"define" : "ASSERTS_ENABLED"
+				},
+				{
+					"backtrace" : 2,
+					"define" : "BOOST_ALL_NO_LIB"
+				},
+				{
+					"backtrace" : 2,
+					"define" : "BOOST_PROGRAM_OPTIONS_DYN_LINK"
+				},
+				{
+					"backtrace" : 5,
+					"define" : "ENABLE_TIMEPROF"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 6,
+					"path" : "/home/user/srsran/build/lib/include"
+				},
+				{
+					"backtrace" : 7,
+					"path" : "/home/user/srsran/lib/include"
+				},
+				{
+					"backtrace" : 9,
+					"path" : "/home/user/srsran"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/home/user/srsran/cmake/modules"
+				}
+			],
+			"language" : "CXX",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		}
+	],
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 2,
+			"id" : "srsran_common::@7806e941b10f07a3cdfe"
+		},
+		{
+			"backtrace" : 2,
+			"id" : "srsran_phy::@ff75a69bd6f9fa6d3921"
+		},
+		{
+			"backtrace" : 2,
+			"id" : "srsran_rf_utils::@027f138477c61cd56dba"
+		},
+		{
+			"backtrace" : 2,
+			"id" : "srsran_rf::@027f138477c61cd56dba"
+		},
+		{
+			"backtrace" : 2,
+			"id" : "srsran_radio::@3e8c5c7e04fd77711b05"
+		},
+		{
+			"backtrace" : 2,
+			"id" : "srslog::@ad47f0aceb6ab6835148"
+		},
+		{
+			"backtrace" : 2,
+			"id" : "support::@eee3a3e78be170f850bb"
+		},
+		{
+			"backtrace" : 2,
+			"id" : "srsue_phy::@93da7d92d7d27749d7a2"
+		}
+	],
+	"id" : "nr_cell_search_test::@1d089e81d02f9ee38582",
+	"link" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "-Wall -Wno-comment -Wno-reorder -Wno-unused-variable -Wtype-limits -std=c++14 -fno-strict-aliasing -Wno-unused-but-set-variable -march=native -mfpmath=sse -mavx2 -DLV_HAVE_AVX2 -DLV_HAVE_AVX -DLV_HAVE_SSE -ggdb -O0 -DDEBUG_MODE -DBUILD_TYPE_DEBUG -Werror -g",
+				"role" : "flags"
+			},
+			{
+				"fragment" : "",
+				"role" : "flags"
+			},
+			{
+				"fragment" : "-Wl,-rpath,/home/user/srsran/build/lib/src/phy/rf",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "../libsrsue_phy.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "../../../../lib/src/common/libsrsran_common.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "../../../../lib/src/phy/libsrsran_phy.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "../../../../lib/src/radio/libsrsran_radio.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-lpthread",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "/usr/lib/x86_64-linux-gnu/libboost_program_options.so.1.71.0",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "../../../../lib/src/common/libsrsran_common.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../../../../lib/src/support/libsupport.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../../../../lib/src/srslog/libsrslog.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-lpthread",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "/usr/lib/x86_64-linux-gnu/libmbedcrypto.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "/usr/lib/x86_64-linux-gnu/libsctp.so",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../../../../lib/src/phy/rf/libsrsran_rf.so.22.10.0",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-ldl",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "../../../../lib/src/phy/rf/libsrsran_rf_utils.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "../../../../lib/src/phy/libsrsran_phy.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-lpthread",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-lm",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "/usr/lib/x86_64-linux-gnu/libfftw3f.so",
+				"role" : "libraries"
+			}
+		],
+		"language" : "CXX"
+	},
+	"name" : "nr_cell_search_test",
+	"nameOnDisk" : "nr_cell_search_test",
+	"paths" : 
+	{
+		"build" : "srsue/src/phy/test",
+		"source" : "srsue/src/phy/test"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "srsue/src/phy/test/nr_cell_search_test.cc",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "EXECUTABLE"
+}

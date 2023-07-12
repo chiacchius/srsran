@@ -1966,6 +1966,7 @@ void nas::cipher_decrypt(srsran::byte_buffer_t* pdu)
 void nas::cipher_encrypt(srsran::byte_buffer_t* pdu)
 {
   srsran::byte_buffer_t pdu_tmp;
+  
   switch (m_sec_ctx.cipher_algo) {
     case srsran::CIPHERING_ALGORITHM_ID_EEA0:
       break;

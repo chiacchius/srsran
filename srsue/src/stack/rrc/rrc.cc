@@ -1820,6 +1820,7 @@ void rrc::send_ul_dcch_msg(uint32_t lcid, const ul_dcch_msg_s& msg)
 
 void rrc::write_sdu(srsran::unique_byte_buffer_t sdu)
 {
+  
   if (state == RRC_STATE_IDLE) {
     logger.warning("Received ULInformationTransfer SDU when in IDLE");
     return;

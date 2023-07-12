@@ -21,6 +21,7 @@
 
 #include "srsue/hdr/stack/upper/nas_base.h"
 
+
 using namespace srsran;
 namespace srsue {
 nas_base::nas_base(srslog::basic_logger& logger_, uint32_t mac_offset_, uint32_t seq_offset_, uint32_t bearer_id_) :
@@ -142,6 +143,18 @@ void nas_base::cipher_encrypt(byte_buffer_t* pdu)
   if (ctxt_base.cipher_algo != CIPHERING_ALGORITHM_ID_EEA0) {
     logger.debug("Encrypting PDU. count=%d", ctxt_base.tx_count);
   }
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+  */
+  
+  // printf("NAS before encryption:\n");
+  // printf("BYTES: %d\n", pdu->N_bytes);
+  // for(size_t i = 0; i < (pdu->N_bytes) - seq_offset - 1; ++i) {
+  //       printf("%02x ", (unsigned char)pdu->msg[seq_offset + 1 + i]);
+  // }
+  // printf("\n");
+
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++*/
 
   switch (ctxt_base.cipher_algo) {
     case CIPHERING_ALGORITHM_ID_EEA0:
@@ -180,6 +193,7 @@ void nas_base::cipher_encrypt(byte_buffer_t* pdu)
       logger.error("Ciphering algorithm not known");
       break;
   }
+  
 }
 
 void nas_base::cipher_decrypt(byte_buffer_t* pdu)
@@ -224,12 +238,25 @@ void nas_base::cipher_decrypt(byte_buffer_t* pdu)
                         pdu->N_bytes - seq_offset + 1,
                         &tmp_pdu.msg[seq_offset + 1]);
       logger.debug(tmp_pdu.msg, pdu->N_bytes, "Decrypted");
+      
       memcpy(&pdu->msg[seq_offset + 1], &tmp_pdu.msg[seq_offset + 1], pdu->N_bytes - seq_offset + 1);
       break;
     default:
       logger.error("Ciphering algorithms not known");
       break;
   }
+
+  // printf("NAS after decryption:\n");
+  // printf("BYTES: %d\n", pdu->N_bytes);
+  // for(size_t i=0; i < (pdu->N_bytes) - seq_offset - 1; ++i) {
+  //       printf("%02x ", (unsigned char)pdu->msg[seq_offset + 1 + i]);
+  // }
+  // printf("\n");
+
+  
+
 }
+
+
 
 } // namespace srsue
