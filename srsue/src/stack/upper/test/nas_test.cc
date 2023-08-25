@@ -94,6 +94,7 @@ int mme_attach_request_test()
     byte_buffer_pool*    pool = byte_buffer_pool::get_instance();
     unique_byte_buffer_t tmp  = srsran::make_byte_buffer();
     TESTASSERT(tmp != nullptr);
+    
     memcpy(tmp->msg, attach_accept_pdu, sizeof(attach_accept_pdu));
     tmp->N_bytes = sizeof(attach_accept_pdu);
     nas.write_pdu(LCID, std::move(tmp));

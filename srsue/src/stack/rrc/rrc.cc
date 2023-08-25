@@ -1445,30 +1445,35 @@ void rrc::handle_sib1()
   // fclose(fp);
   struct sockaddr_in serv_addr;
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-  if (socket_fd != -1) {
-        
+  //if (socket_fd != -1) {
+  FILE* file = fopen("5g_connection.txt", "a");
+  if (file != NULL) {    
+  
     memset(&serv_addr, 0, sizeof(serv_addr));
     enc = 0;
     int temp = 0;
+    
     // Imposta l'indirizzo IP e la porta del server a cui connettersi
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     serv_addr.sin_port = htons(12345);
     // Connette il socket al server
-    if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
-      int num_bytes = strlen(jw.to_string().c_str());
-      char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
-      int len = sprintf(bytes_str, "%s", jw.to_string().c_str());
-      char buffer[sizeof(int) * 3 + len];
-      memcpy(buffer, &enc, sizeof(int));
-      memcpy(buffer + sizeof(int), &temp, sizeof(int));
-      memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
-      memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
-      
-      send(socket_fd, buffer, sizeof(buffer), 0);
-      printf("Messaggio inviato al server, sib1\n");
-      close(socket_fd);
-    }
+    //if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
+    int num_bytes = strlen(jw.to_string().c_str());
+    char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
+    int len = sprintf(bytes_str, "%s", jw.to_string().c_str());
+    char buffer[sizeof(int) * 3 + len];
+    memcpy(buffer, &enc, sizeof(int));
+    memcpy(buffer + sizeof(int), &temp, sizeof(int));
+    memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
+    memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
+    fprintf(file, "SIB1:\n%s\n", jw.to_string().c_str());
+    fflush(file);
+    fclose(file);
+    //send(socket_fd, buffer, sizeof(buffer), 0);
+    printf("Messaggio inviato al server, sib1\n");
+    //close(socket_fd);
+    //  }
   }
         
 
@@ -1519,31 +1524,36 @@ void rrc::handle_sib2()
 
   struct sockaddr_in serv_addr;
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-  if (socket_fd != -1) {
+  //if (socket_fd != -1) {
         
-      memset(&serv_addr, 0, sizeof(serv_addr));
-      enc = 0;
-      int temp = 0;
-      // Imposta l'indirizzo IP e la porta del server a cui connettersi
-      serv_addr.sin_family = AF_INET;
-      serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-      serv_addr.sin_port = htons(12345);
-      // Connette il socket al server
-      if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
-        int num_bytes = strlen(jw.to_string().c_str());
-        char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
-        int len = sprintf(bytes_str, "%s", jw.to_string().c_str());
-        char buffer[sizeof(int) * 3 + len];
-        memcpy(buffer, &enc, sizeof(int));
-        memcpy(buffer + sizeof(int), &temp, sizeof(int));
-        memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
-        memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
-        
-        send(socket_fd, buffer, sizeof(buffer), 0);
-        
-        printf("Messaggio inviato al server, sib2");
-        close(socket_fd);
-      }
+  FILE* file = fopen("5g_connection.txt", "a");
+  if (file != NULL) {    
+  
+    memset(&serv_addr, 0, sizeof(serv_addr));
+    enc = 0;
+    int temp = 0;
+    
+    // Imposta l'indirizzo IP e la porta del server a cui connettersi
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    serv_addr.sin_port = htons(12345);
+    // Connette il socket al server
+    //if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
+    int num_bytes = strlen(jw.to_string().c_str());
+    char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
+    int len = sprintf(bytes_str, "%s", jw.to_string().c_str());
+    char buffer[sizeof(int) * 3 + len];
+    memcpy(buffer, &enc, sizeof(int));
+    memcpy(buffer + sizeof(int), &temp, sizeof(int));
+    memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
+    memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
+    fprintf(file, "SIB2:\n%s\n", jw.to_string().c_str());
+    fflush(file);
+    fclose(file);
+    //send(socket_fd, buffer, sizeof(buffer), 0);
+    printf("Messaggio inviato al server, sib2\n");
+    //close(socket_fd);
+    //  }
   }
   /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1613,31 +1623,38 @@ void rrc::handle_sib3()
 
   struct sockaddr_in serv_addr;
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-  if (socket_fd != -1) {
+  //if (socket_fd != -1) {
         
+  FILE* file = fopen("5g_connection.txt", "a");
+  if (file != NULL) {    
+  
     memset(&serv_addr, 0, sizeof(serv_addr));
     enc = 0;
     int temp = 0;
+    
     // Imposta l'indirizzo IP e la porta del server a cui connettersi
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     serv_addr.sin_port = htons(12345);
     // Connette il socket al server
-      if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
-        int num_bytes = strlen(jw.to_string().c_str());
-        char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
-        int len = sprintf(bytes_str, "%s", jw.to_string().c_str());
-        char buffer[sizeof(int) * 3 + len];
-        memcpy(buffer, &enc, sizeof(int));
-        memcpy(buffer + sizeof(int), &temp, sizeof(int));
-        memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
-        memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
-        
-        send(socket_fd, buffer, sizeof(buffer), 0);
-        printf("Messaggio inviato al server, sib3\n");
-        close(socket_fd);
-      }
+    //if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
+    int num_bytes = strlen(jw.to_string().c_str());
+    char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
+    int len = sprintf(bytes_str, "%s", jw.to_string().c_str());
+    char buffer[sizeof(int) * 3 + len];
+    memcpy(buffer, &enc, sizeof(int));
+    memcpy(buffer + sizeof(int), &temp, sizeof(int));
+    memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
+    memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
+    fprintf(file, "SIB3:\n%s\n", jw.to_string().c_str());
+    fflush(file);
+    fclose(file);
+    //send(socket_fd, buffer, sizeof(buffer), 0);
+    printf("Messaggio inviato al server, sib3\n");
+    //close(socket_fd);
+    //  }
   }
+  
   
   /**++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 

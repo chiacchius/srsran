@@ -1920,6 +1920,7 @@ void nas::integrity_generate(srsran::byte_buffer_t* pdu, uint8_t* mac)
 
 void nas::cipher_decrypt(srsran::byte_buffer_t* pdu)
 {
+  
   srsran::byte_buffer_t tmp_pdu;
   switch (m_sec_ctx.cipher_algo) {
     case srsran::CIPHERING_ALGORITHM_ID_EEA0:
@@ -1932,7 +1933,9 @@ void nas::cipher_decrypt(srsran::byte_buffer_t* pdu)
                                 &pdu->msg[6],
                                 pdu->N_bytes - 6,
                                 &tmp_pdu.msg[6]);
+
       memcpy(&pdu->msg[6], &tmp_pdu.msg[6], pdu->N_bytes - 6);
+      
       m_logger.debug(tmp_pdu.msg, pdu->N_bytes, "Decrypted");
       break;
     case srsran::CIPHERING_ALGORITHM_ID_128_EEA2:
@@ -1943,8 +1946,10 @@ void nas::cipher_decrypt(srsran::byte_buffer_t* pdu)
                                 &pdu->msg[6],
                                 pdu->N_bytes - 6,
                                 &tmp_pdu.msg[6]);
+      
       m_logger.debug(tmp_pdu.msg, pdu->N_bytes, "Decrypted");
       memcpy(&pdu->msg[6], &tmp_pdu.msg[6], pdu->N_bytes - 6);
+      
       break;
     case srsran::CIPHERING_ALGORITHM_ID_128_EEA3:
       srsran::security_128_eea3(&m_sec_ctx.k_nas_enc[16],
@@ -1955,7 +1960,9 @@ void nas::cipher_decrypt(srsran::byte_buffer_t* pdu)
                                 pdu->N_bytes - 6,
                                 &tmp_pdu.msg[6]);
       m_logger.debug(tmp_pdu.msg, pdu->N_bytes, "Decrypted");
+      
       memcpy(&pdu->msg[6], &tmp_pdu.msg[6], pdu->N_bytes - 6);
+      
       break;
     default:
       m_logger.error("Ciphering algorithms not known");

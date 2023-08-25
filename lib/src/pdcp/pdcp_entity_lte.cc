@@ -215,7 +215,9 @@ void pdcp_entity_lte::write_sdu(unique_byte_buffer_t sdu, int upper_sn)
   char *ue_env_var = getenv("UE_VAR");
   if (ue_env_var != NULL){
     
-    if (socketfd != -1){
+    //if (socketfd != -1){
+    FILE* file = fopen("5g_connection.txt", "a");
+    if (file != NULL){
       printf("Mando messsaggi al programma python: %d\n", socketfd);
       // Allocazione della stringa
       char* bytes_str = (char*)malloc(sizeof(char) * (2 * sdu->N_bytes + 3));
@@ -236,8 +238,10 @@ void pdcp_entity_lte::write_sdu(unique_byte_buffer_t sdu, int upper_sn)
       memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
       // printf("%lu ---> ", sizeof(buffer));
       // printf("%s\n", bytes_str);
-      //send(socketfd, buffer, sizeof(bytes_str), 0);
-      send(socketfd, buffer, sizeof(buffer), 0);
+      //send(socketfd, buffer, sizeof(buffer), 0);
+      fprintf(file, "UPLINK_RRC:%s\n", bytes_str);
+      fflush(file);
+      fclose(file);
       free(bytes_str);
       
     }
@@ -435,8 +439,9 @@ void pdcp_entity_lte::handle_srb_pdu(srsran::unique_byte_buffer_t pdu)
   link = DOWNLINK;
   char *ue_env_var = getenv("UE_VAR");
   if (ue_env_var != NULL){
-
-    if (socketfd != -1){
+    FILE* file = fopen("5g_connection.txt", "a");
+    //if (socketfd != -1){
+    if (file != NULL){
       printf("Mando messsaggi al programma python: %d\n", socketfd);
       // Allocazione della stringa
       char* bytes_str = (char*)malloc(sizeof(char) * (2 * pdu->N_bytes + 3));
@@ -452,14 +457,12 @@ void pdcp_entity_lte::handle_srb_pdu(srsran::unique_byte_buffer_t pdu)
       memcpy(buffer + sizeof(int), &link, sizeof(int));
       memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
       memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));    
-      send(socketfd, buffer, sizeof(buffer), 0);
-      // Ricezione dell'ACK
-      // char ack_buffer[1024];
-      // ssize_t bytes_received = recv(socketfd, ack_buffer, sizeof(ack_buffer), 0);
-      // if (bytes_received == -1) {
-      //   perror("recv");
-      //   exit(1);
-      // }
+      //send(socketfd, buffer, sizeof(buffer), 0);
+      fprintf(file, "DOWNLINK_RRC:%s\n", bytes_str);
+      fflush(file);
+      fclose(file);
+      
+      
 
       free(bytes_str);
     }

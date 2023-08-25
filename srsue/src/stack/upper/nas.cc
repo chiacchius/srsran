@@ -26,6 +26,7 @@
 #include <iomanip>
 #include <iostream>
 #include <unistd.h>
+#include <sys/socket.h>
 
 #include "srsran/asn1/liblte_mme.h"
 #include "srsran/common/standard_streams.h"
@@ -38,6 +39,10 @@
 #define LTE_MAC_OFFSET 1
 #define LTE_SEQ_OFFSET 5
 #define LTE_NAS_BEARER 0
+
+#define DOWNLINK 0
+#define UPLINK 1
+#define PORT 12345
 
 using namespace srsran;
 
@@ -472,7 +477,7 @@ void nas::write_pdu(uint32_t lcid, unique_byte_buffer_t pdu)
   uint8 sec_hdr_type = 0;
 
   logger.info(pdu->msg, pdu->N_bytes, "DL %s PDU", rrc->get_rb_name(lcid));
-
+  
   // Parse the message security header
   liblte_mme_parse_msg_sec_header((LIBLTE_BYTE_MSG_STRUCT*)pdu.get(), &pd, &sec_hdr_type);
   switch (sec_hdr_type) {
@@ -484,6 +489,7 @@ void nas::write_pdu(uint32_t lcid, unique_byte_buffer_t pdu)
     case LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY_AND_CIPHERED:
       if ((integrity_check(pdu.get()))) {
         if (sec_hdr_type == LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY_AND_CIPHERED) {
+          printf("########\n");
           cipher_decrypt(pdu.get());
         }
         break;
@@ -500,7 +506,7 @@ void nas::write_pdu(uint32_t lcid, unique_byte_buffer_t pdu)
   if (pcap != nullptr) {
     pcap->write_nas(pdu->msg, pdu->N_bytes);
   }
-
+  
   // Parse the message header
   liblte_mme_parse_msg_header((LIBLTE_BYTE_MSG_STRUCT*)pdu.get(), &pd, &msg_type);
   logger.info(pdu->msg, pdu->N_bytes, "DL %s Decrypted PDU", rrc->get_rb_name(lcid));
@@ -527,13 +533,40 @@ void nas::write_pdu(uint32_t lcid, unique_byte_buffer_t pdu)
    * Author: Matteo Chiacchia
   */
   
-  printf("NAS message bytes\n");
+  printf("NAS downlink message decripted bytes\n");
   //printf("BYTES: %d\n", pdu->N_bytes);
   for(size_t i = 0; i < (pdu->N_bytes); ++i) {
-        printf("%02x ", (unsigned char)pdu->msg[i]);
+        printf("%02x", (unsigned char)pdu->msg[i]);
   }
   printf("\n");
+  FILE* file = fopen("5g_connection.txt", "a");
+  //if (socketfd != -1){
+  if (file != NULL){
+    
+    // Allocazione della stringa
+    char* bytes_str = (char*)malloc(sizeof(char) * (2 * pdu->N_bytes + 3));
 
+    // Scrive i bytes nella stringa
+    int len = sprintf(bytes_str, "%s", "");
+    for(size_t i = 0; i < pdu->N_bytes; ++i) {
+      len += sprintf(bytes_str + len, "%02x", pdu->msg[i]);
+    }
+    //printf("%s\n", bytes_str);
+    char buffer[sizeof(int) * 3 + strlen(bytes_str)];
+    // memcpy(buffer, &enc, sizeof(int));
+    // memcpy(buffer + sizeof(int), &link, sizeof(int));
+    // memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
+    // memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));    
+    //send(socketfd, buffer, sizeof(buffer), 0);
+    fprintf(file, "DOWNLINK_NAS:%s\n", bytes_str);
+    fflush(file);
+    fclose(file);
+    
+    
+
+    free(bytes_str);
+  }
+  
   /*+++++++++++++++++++++++++++++++++++++++++++++++++*/
   // Reserved for Security Mode Command (Sec 9.3.1)
   if (sec_hdr_type == LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY_WITH_NEW_EPS_SECURITY_CONTEXT &&
@@ -543,54 +576,72 @@ void nas::write_pdu(uint32_t lcid, unique_byte_buffer_t pdu)
                  sec_hdr_type);
     return;
   }
-
+  printf("    \033[94m|\033[0m\n");
+  printf("    \033[94m|\033[0m\n");
+  printf("    \033[94mV\033[0m\n");
   switch (msg_type) {
     case LIBLTE_MME_MSG_TYPE_ATTACH_ACCEPT:
+      printf("\033[94mAttach accept\033[0m\n");
       parse_attach_accept(lcid, std::move(pdu));
       break;
     case LIBLTE_MME_MSG_TYPE_ATTACH_REJECT:
+      printf("\033[94mAttach reject\033[0m\n");
       parse_attach_reject(lcid, std::move(pdu), sec_hdr_type);
       break;
     case LIBLTE_MME_MSG_TYPE_AUTHENTICATION_REQUEST:
+      printf("\033[94mAuthentication request\033[0m\n");
       parse_authentication_request(lcid, std::move(pdu), sec_hdr_type);
       break;
     case LIBLTE_MME_MSG_TYPE_AUTHENTICATION_REJECT:
+      printf("\033[94mAuthentication reject\033[0m\n");
       parse_authentication_reject(lcid, std::move(pdu));
       break;
     case LIBLTE_MME_MSG_TYPE_IDENTITY_REQUEST:
+      printf("\033[94mIdentity request\033[0m\n");
       parse_identity_request(std::move(pdu), sec_hdr_type);
       break;
     case LIBLTE_MME_MSG_TYPE_SECURITY_MODE_COMMAND:
+      printf("\033[94mSecurity Mode command\033[0m\n");
       parse_security_mode_command(lcid, std::move(pdu));
       break;
     case LIBLTE_MME_MSG_TYPE_SERVICE_REJECT:
+      printf("\033[94mService reject\033[0m\n");
       parse_service_reject(lcid, std::move(pdu), sec_hdr_type);
       break;
     case LIBLTE_MME_MSG_TYPE_ESM_INFORMATION_REQUEST:
+      printf("\033[94mESM information request\033[0m\n");
       parse_esm_information_request(lcid, std::move(pdu));
       break;
     case LIBLTE_MME_MSG_TYPE_EMM_INFORMATION:
+      printf("\033[94mEMM information\033[0m\n");
       parse_emm_information(lcid, std::move(pdu));
       break;
     case LIBLTE_MME_MSG_TYPE_EMM_STATUS:
+      printf("\033[94mEMM status\033[0m\n");
       parse_emm_status(lcid, std::move(pdu));
       break;
     case LIBLTE_MME_MSG_TYPE_DETACH_REQUEST:
+      printf("\033[94mDetach request\033[0m\n");
       parse_detach_request(lcid, std::move(pdu));
       break;
     case LIBLTE_MME_MSG_TYPE_ACTIVATE_DEDICATED_EPS_BEARER_CONTEXT_REQUEST:
+      printf("\033[94mActivate dedicated EPS bearer context request\033[0m\n");
       parse_activate_dedicated_eps_bearer_context_request(lcid, std::move(pdu));
       break;
     case LIBLTE_MME_MSG_TYPE_DEACTIVATE_EPS_BEARER_CONTEXT_REQUEST:
+      printf("\033[94mDeactivate dedicated EPS bearer context request\033[0m\n");
       parse_deactivate_eps_bearer_context_request(std::move(pdu));
       break;
     case LIBLTE_MME_MSG_TYPE_MODIFY_EPS_BEARER_CONTEXT_REQUEST:
+      printf("\033[94mModify EPS bearer context request\033[0m\n");
       parse_modify_eps_bearer_context_request(std::move(pdu));
       break;
     case LIBLTE_MME_MSG_TYPE_ACTIVATE_TEST_MODE:
+      printf("\033[94mActivate test mode\033[0m\n");
       parse_activate_test_mode(lcid, std::move(pdu));
       break;
     case LIBLTE_MME_MSG_TYPE_CLOSE_UE_TEST_LOOP:
+      printf("\033[94mClose UE test loop\033[0m\n");
       parse_close_ue_test_loop(lcid, std::move(pdu));
       break;
     // TODO: Handle deactivate test mode and ue open test loop
@@ -609,8 +660,57 @@ void nas::write_pdu(uint32_t lcid, unique_byte_buffer_t pdu)
   */
 void nas::uplink_message_hook(uint8_t *msg, uint32_t N_bytes){
   
-  return;
-};
+  printf("NAS uplink message bytes\n");
+  //printf("BYTES: %d\n", pdu->N_bytes);
+  for(size_t i = 0; i < N_bytes; ++i) {
+        printf("%02x", msg[i]);
+  }
+  printf("\n");
+
+  // send message to my program
+  send_nas_message(msg, N_bytes, UPLINK);
+
+}
+
+void nas::send_nas_message(uint8_t *msg, uint32_t N_bytes, int link){
+
+  int enc = 1;
+  int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  char* bytes_str = (char*)malloc(sizeof(char) * (2 * N_bytes + 3));
+  
+  FILE* file = fopen("5g_connection.txt", "a");
+  //if (socketfd != -1){
+  if (file != NULL){
+    
+    // Allocazione della stringa
+    char* bytes_str = (char*)malloc(sizeof(char) * (2 * N_bytes + 3));
+
+    // Scrive i bytes nella stringa
+    int len = sprintf(bytes_str, "%s", "");
+    for(size_t i = 0; i < N_bytes; ++i) {
+      len += sprintf(bytes_str + len, "%02x", msg[i]);
+    }
+    //printf("%s\n", bytes_str);
+    char buffer[sizeof(int) * 3 + strlen(bytes_str)];
+    // memcpy(buffer, &enc, sizeof(int));
+    // memcpy(buffer + sizeof(int), &link, sizeof(int));
+    // memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
+    // memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));    
+    //send(socketfd, buffer, sizeof(buffer), 0);
+    printf("########");
+    fprintf(file, "UPLINK_NAS:%s\n", bytes_str);
+    fflush(file);
+    fclose(file);
+    
+
+    free(bytes_str);
+  }
+
+}
+
+
+
+
   /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 
@@ -1274,6 +1374,13 @@ void nas::parse_security_mode_command(uint32_t lcid, unique_byte_buffer_t pdu)
     pcap->write_nas(pdu->msg, pdu->N_bytes);
   }
   
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  * Author: Matteo Chiacchia
+  */
+  printf("\033[93mSecurity Mode complete\033[0m\n");
+  uplink_message_hook(pdu->msg, pdu->N_bytes);
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
   if (apply_security_config(pdu, current_sec_hdr)) {
     logger.error("Error applying NAS security.");
     return;
@@ -1634,7 +1741,8 @@ void nas::gen_attach_request(srsran::unique_byte_buffer_t& msg)
      /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     * Author: Matteo Chiacchia
     */
-    uplink_message_hook(msg->msg, msg->N_bytes);
+    //printf("Attach request msg\n");
+    //uplink_message_hook(msg->msg, msg->N_bytes);
     /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 
@@ -1642,6 +1750,7 @@ void nas::gen_attach_request(srsran::unique_byte_buffer_t& msg)
       logger.error("Error applying NAS security.");
       return;
     }
+
   } else {
     attach_req.eps_mobile_id.type_of_id = LIBLTE_MME_EPS_MOBILE_ID_TYPE_IMSI;
     attach_req.nas_ksi.tsc_flag         = LIBLTE_MME_TYPE_OF_SECURITY_CONTEXT_FLAG_NATIVE;
@@ -1654,7 +1763,13 @@ void nas::gen_attach_request(srsran::unique_byte_buffer_t& msg)
   if (pcap != nullptr) {
     pcap->write_nas(msg->msg, msg->N_bytes);
   }
-
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  * Author: Matteo Chiacchia
+  */
+  printf("\033[93mAttach request\033[0m\n");
+  uplink_message_hook(msg->msg, msg->N_bytes);
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  
   if (have_ctxt) {
     set_k_enb_count(ctxt_base.tx_count);
     ctxt_base.tx_count++;
@@ -1691,7 +1806,6 @@ void nas::gen_service_request(srsran::unique_byte_buffer_t& msg)
   msg->msg[1] = (ctxt.ksi & 0x07u) << 5u;
   msg->msg[1] |= ctxt_base.tx_count & 0x1Fu;
   msg->N_bytes++;
-
   uint8_t mac[4];
   integrity_generate(&ctxt_base.k_nas_int[16], ctxt_base.tx_count, SECURITY_DIRECTION_UPLINK, &msg->msg[0], 2, &mac[0]);
   // Set the short MAC
@@ -1703,6 +1817,13 @@ void nas::gen_service_request(srsran::unique_byte_buffer_t& msg)
   if (pcap != nullptr) {
     pcap->write_nas(msg->msg, msg->N_bytes);
   }
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+  */
+  printf("\033[93mService request\033[0m\n");
+  uplink_message_hook(msg->msg, msg->N_bytes);
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+  
   set_k_enb_count(ctxt_base.tx_count);
   ctxt_base.tx_count++;
 }
@@ -1765,6 +1886,7 @@ void nas::send_security_mode_reject(uint8_t cause)
   /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    * Author: Matteo Chiacchia
   */
+  printf("\033[93mSecurity Mode reject\033[0m\n");
   uplink_message_hook(msg->msg, msg->N_bytes);
   /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   if (pcap != nullptr) {
@@ -1889,6 +2011,7 @@ void nas::send_attach_complete(const uint8_t& transaction_id_, const uint8_t& ep
   /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    * Author: Matteo Chiacchia
   */
+  printf("\033[93mAttach Complete\033[0m\n");
   uplink_message_hook(pdu->msg, pdu->N_bytes);
   /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1921,9 +2044,10 @@ void nas::send_detach_accept()
   if (pcap != nullptr) {
     pcap->write_nas(pdu->msg, pdu->N_bytes);
   }
- /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    * Author: Matteo Chiacchia
   */
+  printf("\033[93mDetach Accept\033[0m\n");
   uplink_message_hook(pdu->msg, pdu->N_bytes);
   /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -1959,6 +2083,7 @@ void nas::send_authentication_response(const uint8_t* res, const size_t res_len)
   /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    * Author: Matteo Chiacchia
   */
+  printf("\033[93mAuthentication Response\033[0m\n");
   uplink_message_hook(pdu->msg, pdu->N_bytes);
   /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   if (apply_security_config(pdu, current_sec_hdr)) {
@@ -2032,6 +2157,7 @@ void nas::send_identity_response(const uint8 id_type)
   /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    * Author: Matteo Chiacchia
   */
+  printf("\033[93mIdentity Response\033[0m\n");
   uplink_message_hook(pdu->msg, pdu->N_bytes);
   /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   // add security if needed
@@ -2189,6 +2315,7 @@ void nas::send_esm_information_response(const uint8 proc_transaction_id)
   /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   * Author: Matteo Chiacchia
   */
+  printf("\033[93mESM Information Response\033[0m\n");
   uplink_message_hook(pdu->msg, pdu->N_bytes);
   /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2230,6 +2357,7 @@ void nas::send_activate_dedicated_eps_bearer_context_accept(const uint8_t& proc_
  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    * Author: Matteo Chiacchia
   */
+  printf("\033[93mActivate dedicated EPS bearer context Accept\033[0m\n");
   uplink_message_hook(pdu->msg, pdu->N_bytes);
   /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2274,6 +2402,7 @@ void nas::send_deactivate_eps_bearer_context_accept(const uint8_t& proc_transact
  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    * Author: Matteo Chiacchia
   */
+  printf("\033[93mDectivate dedicated EPS bearer context Accept\033[0m\n");
   uplink_message_hook(pdu->msg, pdu->N_bytes);
   /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2319,6 +2448,7 @@ void nas::send_modify_eps_bearer_context_accept(const uint8_t& proc_transaction_
  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    * Author: Matteo Chiacchia
   */
+  printf("\033[93mModify dedicated EPS bearer context Accept\033[0m\n");
   uplink_message_hook(pdu->msg, pdu->N_bytes);
   /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2357,6 +2487,7 @@ void nas::send_activate_test_mode_complete()
  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    * Author: Matteo Chiacchia
   */
+  printf("\033[93mActivate test mode Complete\033[0m\n");
   uplink_message_hook(pdu->msg, pdu->N_bytes);
   /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
@@ -2392,6 +2523,7 @@ void nas::send_close_ue_test_loop_complete()
  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    * Author: Matteo Chiacchia
   */
+  printf("\033[93mClose UE  test loop Complete\033[0m\n");
   uplink_message_hook(pdu->msg, pdu->N_bytes);
   /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 

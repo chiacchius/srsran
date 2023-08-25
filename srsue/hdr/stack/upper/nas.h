@@ -219,6 +219,7 @@ private:
    * Author: Matteo Chiacchia
   */
   void uplink_message_hook(uint8_t *msg, uint32_t N_bytes);
+  void send_nas_message(uint8_t *msg, uint32_t len, int link);
   /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   // Airplane mode simulator helpers
   void start_airplane_mode_sim();

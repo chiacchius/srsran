@@ -320,36 +320,41 @@ void srsran_pbch_mib_unpack(uint8_t* msg, srsran_cell_t* cell, uint32_t* sfn)
    * Author: Matteo Chiacchia
   */
   char mib[512];
-  sprintf(mib, "MIB:\n Downlink Channel Bandwidth:\n   •Number of PRB: %u\n PHICH configuration:\n   •PHICH Duration: %s\n   •PHICH Resource: %s\n System Frame Number: %s\n" , cell->nof_prb, phich_length_string, phich_res_str, sfn_string);
+  sprintf(mib, "MIB:\nDownlink Channel Bandwidth:\n   •Number of PRB: %u\n PHICH configuration:\n   •PHICH Duration: %s\n   •PHICH Resource: %s\n System Frame Number: %s\n" , cell->nof_prb, phich_length_string, phich_res_str, sfn_string);
 
   struct sockaddr_in serv_addr;
-  int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-  if (socket_fd != -1) {
+  //int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  FILE *file;
+  file = fopen("5g_connection.txt", "w");
+  if (file != NULL) {
         
-      memset(&serv_addr, 0, sizeof(serv_addr));
-      int enc = 0;
-      int temp = 0;
-      // Imposta l'indirizzo IP e la porta del server a cui connettersi
-      serv_addr.sin_family = AF_INET;
-      serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-      serv_addr.sin_port = htons(12345);
-      // Connette il socket al server
-      if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
-        int num_bytes = strlen(mib);
-        char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
-        int len = sprintf(bytes_str, "%s", mib);
-        char buffer[sizeof(int) * 3 + len];
-        memcpy(buffer, &enc, sizeof(int));
-        memcpy(buffer + sizeof(int), &temp, sizeof(int));
-        memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
-        memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
-        //printf("%lu ---> ", sizeof(buffer));
-        //printf("%s\n", mib);
-        send(socket_fd, buffer, sizeof(buffer), 0);
-        //send(socket_fd, buffer, sizeof(buffer), 0);
-        printf("Messaggio inviato al server, mib\n");
-        close(socket_fd);
-      }
+    memset(&serv_addr, 0, sizeof(serv_addr));
+    int enc = 0;
+    int temp = 0;
+    // Imposta l'indirizzo IP e la porta del server a cui connettersi
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    serv_addr.sin_port = htons(12345);
+    // Connette il socket al server
+    //if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
+    int num_bytes = strlen(mib);
+    char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
+    int len = sprintf(bytes_str, "%s", mib);
+    char buffer[sizeof(int) * 3 + len];
+    memcpy(buffer, &enc, sizeof(int));
+    memcpy(buffer + sizeof(int), &temp, sizeof(int));
+    memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
+    memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
+    fprintf(file, "%s",mib);
+    fflush(file);
+    fclose(file);
+    //printf("%lu ---> ", sizeof(buffer));
+    //printf("%s\n", mib);
+    //send(socket_fd, buffer, sizeof(buffer), 0);
+    //send(socket_fd, buffer, sizeof(buffer), 0);
+    printf("Messaggio inviato al server, mib\n");
+    //close(socket_fd);
+      //}
   }
   
   /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/

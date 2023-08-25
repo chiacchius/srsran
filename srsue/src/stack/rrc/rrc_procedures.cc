@@ -1100,6 +1100,7 @@ srsran::proc_outcome_t rrc::connection_reconf_no_ho_proc::react(const bool& conf
     if (nas_pdu != nullptr) {
       memcpy(nas_pdu->msg, pdu.data(), pdu.size());
       nas_pdu->N_bytes = pdu.size();
+      
       rrc_ptr->nas->write_pdu(srsran::srb_to_lcid(srsran::lte_srb::srb1), std::move(nas_pdu));
     } else {
       rrc_ptr->logger.error("Couldn't allocate PDU in %s.", __FUNCTION__);

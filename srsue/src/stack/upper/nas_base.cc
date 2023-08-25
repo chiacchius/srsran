@@ -143,19 +143,7 @@ void nas_base::cipher_encrypt(byte_buffer_t* pdu)
   if (ctxt_base.cipher_algo != CIPHERING_ALGORITHM_ID_EEA0) {
     logger.debug("Encrypting PDU. count=%d", ctxt_base.tx_count);
   }
-  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   * Author: Matteo Chiacchia
-  */
   
-  // printf("NAS before encryption:\n");
-  // printf("BYTES: %d\n", pdu->N_bytes);
-  // for(size_t i = 0; i < (pdu->N_bytes) - seq_offset - 1; ++i) {
-  //       printf("%02x ", (unsigned char)pdu->msg[seq_offset + 1 + i]);
-  // }
-  // printf("\n");
-
-  /*+++++++++++++++++++++++++++++++++++++++++++++++++*/
-
   switch (ctxt_base.cipher_algo) {
     case CIPHERING_ALGORITHM_ID_EEA0:
       break;
@@ -204,7 +192,6 @@ void nas_base::cipher_decrypt(byte_buffer_t* pdu)
   if (ctxt_base.cipher_algo != CIPHERING_ALGORITHM_ID_EEA0) {
     logger.debug("Decrypting PDU. Local: count=%d, Received: count=%d", ctxt_base.rx_count, count_est);
   }
-
   switch (ctxt_base.cipher_algo) {
     case CIPHERING_ALGORITHM_ID_EEA0:
       break;

@@ -4433,6 +4433,7 @@ LIBLTE_ERROR_ENUM liblte_mme_parse_msg_header(LIBLTE_BYTE_MSG_STRUCT* msg, uint8
 
     err = LIBLTE_SUCCESS;
   }
+    
 
   return (err);
 }
@@ -4445,6 +4446,7 @@ LIBLTE_ERROR_ENUM liblte_mme_pack_security_protected_nas_msg(LIBLTE_BYTE_MSG_STR
   LIBLTE_ERROR_ENUM err     = LIBLTE_ERROR_INVALID_INPUTS;
   uint8*            msg_ptr = sec_msg->msg;
   uint32            i;
+  printf("################################################\n");
 
   if (msg != NULL && sec_msg != NULL) {
     if (LIBLTE_MME_SECURITY_HDR_TYPE_PLAIN_NAS != sec_hdr_type) {
