@@ -1943,7 +1943,12 @@ void nas::send_detach_request(bool switch_off)
     if (pcap != nullptr) {
       pcap->write_nas(pdu->msg, pdu->N_bytes);
     }
-
+    /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   * Author: Matteo Chiacchia
+    */
+    printf("\033[93mDetach Request\033[0m\n");
+    uplink_message_hook(pdu->msg, pdu->N_bytes);
+    /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
     if (apply_security_config(pdu, LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY)) {
       logger.error("Error applying NAS security.");
       return;
