@@ -615,6 +615,7 @@ void nas::write_pdu(uint32_t lcid, unique_byte_buffer_t pdu)
     case LIBLTE_MME_MSG_TYPE_EMM_INFORMATION:
       printf("\033[94mEMM information\033[0m\n");
       parse_emm_information(lcid, std::move(pdu));
+      
       break;
     case LIBLTE_MME_MSG_TYPE_EMM_STATUS:
       printf("\033[94mEMM status\033[0m\n");
@@ -1448,9 +1449,46 @@ void nas::parse_emm_information(uint32_t lcid, unique_byte_buffer_t pdu)
   liblte_mme_unpack_emm_information_msg((LIBLTE_BYTE_MSG_STRUCT*)pdu.get(), &emm_info);
   std::string str = emm_info_str(&emm_info);
   logger.info("Received EMM Information: %s", str.c_str());
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  * Author: Matteo Chiacchia
+  */
+  //send "start signal" to main.py
+  if (data_analyzer_starter()==0){
+    srsran::console("Starting 5GMAP...\n");
+  }
+  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   srsran::console("%s\n", str.c_str());
   ctxt_base.rx_count++;
 }
+
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  * Author: Matteo Chiacchia
+  */
+
+int nas::data_analyzer_starter(){
+  
+  const char *pipe_path = "./my_pipe";
+
+    // Apri la pipe per la scrittura
+    FILE *pipe = fopen(pipe_path, "w+");
+    if (pipe == NULL) {
+        perror("Errore nell'apertura della pipe");
+        return 1;
+    }
+
+    // Dato da inviare
+    const char *message = "Starting 5G Map";
+
+    // Invia il messaggio alla pipe
+    fprintf(pipe, "%s", message);
+
+    // Chiudi la pipe
+    fclose(pipe);
+
+    return 0;
+
+}
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 void nas::parse_detach_request(uint32_t lcid, unique_byte_buffer_t pdu)
 {

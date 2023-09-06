@@ -48,10 +48,10 @@ void pdcp::init(srsue::rlc_interface_pdcp* rlc_, srsue::rrc_interface_pdcp* rrc_
   rrc = rrc_;
   gw  = gw_;
   socketfd_ext = -1;
-  char *ue_env_var = getenv("UE_VAR");
-  if (ue_env_var != NULL){
-    socketfd_ext = open_socket();
-  }
+  // char *ue_env_var = getenv("UE_VAR");
+  // if (ue_env_var != NULL){
+  //   socketfd_ext = open_socket();
+  // }
 }
 
 void pdcp::stop() {close_socket(socketfd_ext);}

@@ -322,19 +322,16 @@ void srsran_pbch_mib_unpack(uint8_t* msg, srsran_cell_t* cell, uint32_t* sfn)
   char mib[512];
   sprintf(mib, "MIB:\nDownlink Channel Bandwidth:\n   •Number of PRB: %u\n PHICH configuration:\n   •PHICH Duration: %s\n   •PHICH Resource: %s\n System Frame Number: %s\n" , cell->nof_prb, phich_length_string, phich_res_str, sfn_string);
 
-  struct sockaddr_in serv_addr;
+ 
   //int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
   FILE *file;
   file = fopen("5g_connection.txt", "w");
   if (file != NULL) {
         
-    memset(&serv_addr, 0, sizeof(serv_addr));
     int enc = 0;
     int temp = 0;
     // Imposta l'indirizzo IP e la porta del server a cui connettersi
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    serv_addr.sin_port = htons(12345);
+    
     // Connette il socket al server
     //if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
     int num_bytes = strlen(mib);

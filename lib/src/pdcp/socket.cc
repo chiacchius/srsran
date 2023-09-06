@@ -4,33 +4,33 @@
 int open_socket(){
 
     struct sockaddr_in serv_addr;
-    int connfd;
-    int another_mex;
-    char buffer[1024];
-    //verify_network();
-    // socket creation
-    int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (socket_fd == -1) {
-        perror("Socket creation error\n");
-        return -1;
-    }
+    // int connfd;
+    // int another_mex;
+    // char buffer[1024];
+    // //verify_network();
+    // // socket creation
+    // int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    // if (socket_fd == -1) {
+    //     perror("Socket creation error\n");
+    //     return -1;
+    // }
 
-    memset(&serv_addr, 0, sizeof(serv_addr));
+    // memset(&serv_addr, 0, sizeof(serv_addr));
 
-    // Imposta l'indirizzo IP e la porta del server a cui connettersi
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    serv_addr.sin_port = htons(PORT);
+    // // Imposta l'indirizzo IP e la porta del server a cui connettersi
+    // serv_addr.sin_family = AF_INET;
+    // serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    // serv_addr.sin_port = htons(PORT);
 
-    // Connette il socket al server
-    if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) != 0) {
-        perror("Connection failed\n");
-        return -1;
-    }   
+    // // Connette il socket al server
+    // if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) != 0) {
+    //     perror("Connection failed\n");
+    //     return -1;
+    // }   
 
-    printf("Connessione APERTA\n");
-    //sockfd = socket_fd;
-    return socket_fd;
+    // printf("Connessione APERTA\n");
+    // //sockfd = socket_fd;
+    return 0;
 }
 
 

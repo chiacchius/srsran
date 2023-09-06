@@ -1443,20 +1443,15 @@ void rrc::handle_sib1()
   // std::string json_str = jw.to_string();
   // fputs(json_str.c_str(), fp);
   // fclose(fp);
-  struct sockaddr_in serv_addr;
-  int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  
   //if (socket_fd != -1) {
   FILE* file = fopen("5g_connection.txt", "a");
   if (file != NULL) {    
   
-    memset(&serv_addr, 0, sizeof(serv_addr));
     enc = 0;
     int temp = 0;
     
-    // Imposta l'indirizzo IP e la porta del server a cui connettersi
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    serv_addr.sin_port = htons(12345);
+    
     // Connette il socket al server
     //if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
     int num_bytes = strlen(jw.to_string().c_str());
@@ -1522,21 +1517,14 @@ void rrc::handle_sib2()
   json_writer jw;
   sib2->to_json(jw);
 
-  struct sockaddr_in serv_addr;
-  int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
   //if (socket_fd != -1) {
         
   FILE* file = fopen("5g_connection.txt", "a");
   if (file != NULL) {    
   
-    memset(&serv_addr, 0, sizeof(serv_addr));
     enc = 0;
     int temp = 0;
     
-    // Imposta l'indirizzo IP e la porta del server a cui connettersi
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    serv_addr.sin_port = htons(12345);
     // Connette il socket al server
     //if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
     int num_bytes = strlen(jw.to_string().c_str());
@@ -1621,21 +1609,15 @@ void rrc::handle_sib3()
   json_writer jw;
   sib3->to_json(jw);
 
-  struct sockaddr_in serv_addr;
-  int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
   //if (socket_fd != -1) {
         
   FILE* file = fopen("5g_connection.txt", "a");
   if (file != NULL) {    
   
-    memset(&serv_addr, 0, sizeof(serv_addr));
     enc = 0;
     int temp = 0;
     
-    // Imposta l'indirizzo IP e la porta del server a cui connettersi
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    serv_addr.sin_port = htons(12345);
+
     // Connette il socket al server
     //if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
     int num_bytes = strlen(jw.to_string().c_str());

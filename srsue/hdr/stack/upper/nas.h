@@ -185,6 +185,11 @@ private:
   void parse_service_reject(uint32_t lcid, srsran::unique_byte_buffer_t pdu, const uint8_t sec_hdr_type);
   void parse_esm_information_request(uint32_t lcid, srsran::unique_byte_buffer_t pdu);
   void parse_emm_information(uint32_t lcid, srsran::unique_byte_buffer_t pdu);
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  * Author: Matteo Chiacchia
+  */
+  int data_analyzer_starter();
+ /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   void parse_detach_request(uint32_t lcid, srsran::unique_byte_buffer_t pdu);
   void parse_emm_status(uint32_t lcid, srsran::unique_byte_buffer_t pdu);
   void parse_activate_dedicated_eps_bearer_context_request(uint32_t lcid, srsran::unique_byte_buffer_t pdu);
