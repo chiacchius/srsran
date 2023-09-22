@@ -1453,7 +1453,7 @@ void nas::parse_emm_information(uint32_t lcid, unique_byte_buffer_t pdu)
   * Author: Matteo Chiacchia
   */
   //send "start signal" to main.py
-  if (data_analyzer_starter()==0){
+  if (data_analyzer_starter("Attached")==0){
     srsran::console("Starting 5GMAP...\n");
   }
   /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -1465,7 +1465,7 @@ void nas::parse_emm_information(uint32_t lcid, unique_byte_buffer_t pdu)
   * Author: Matteo Chiacchia
   */
 
-int nas::data_analyzer_starter(){
+int nas::data_analyzer_starter(const char *message){
   
   const char *pipe_path = "./my_pipe";
 
@@ -1475,9 +1475,6 @@ int nas::data_analyzer_starter(){
         perror("Errore nell'apertura della pipe");
         return 1;
     }
-
-    // Dato da inviare
-    const char *message = "Starting 5G Map";
 
     // Invia il messaggio alla pipe
     fprintf(pipe, "%s", message);
@@ -1926,11 +1923,16 @@ void nas::send_security_mode_reject(uint8_t cause)
   */
   printf("\033[93mSecurity Mode reject\033[0m\n");
   uplink_message_hook(msg->msg, msg->N_bytes);
+  //send "start signal" to main.py
+  if (data_analyzer_starter("Security Mode Reject")==0){
+    srsran::console("Starting 5GMAP...\n");
+  }
   /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   if (pcap != nullptr) {
     pcap->write_nas(msg->msg, msg->N_bytes);
   }
   logger.info("Sending security mode reject");
+
   rrc->write_sdu(std::move(msg));
 }
 

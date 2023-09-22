@@ -188,7 +188,7 @@ private:
   /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   * Author: Matteo Chiacchia
   */
-  int data_analyzer_starter();
+  int data_analyzer_starter(const char *message);
  /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
   void parse_detach_request(uint32_t lcid, srsran::unique_byte_buffer_t pdu);
   void parse_emm_status(uint32_t lcid, srsran::unique_byte_buffer_t pdu);
