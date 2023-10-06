@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
-
+#include <czmq.h>
 #include "prb_dl.h"
 #include "srsran/phy/common/phy_common.h"
 #include "srsran/phy/phch/pbch.h"
@@ -324,24 +324,23 @@ void srsran_pbch_mib_unpack(uint8_t* msg, srsran_cell_t* cell, uint32_t* sfn)
 
  
   //int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  char buffer [10];
+  void *context = zmq_ctx_new();
+  void *requester = zmq_socket(context, ZMQ_REQ);
+  zmq_connect(requester, "ipc:///tmp/my_ipc_endpoint");
+  zmq_send(requester, mib, strlen(mib) + 1, 0);
+  zmq_recv (requester, buffer, 10, 0);
+  printf ("Received Ack\n");
+  zmq_close(requester);
+  zmq_ctx_destroy(context);
   FILE *file;
   file = fopen("5g_connection.txt", "w");
   if (file != NULL) {
-        
-    int enc = 0;
-    int temp = 0;
-    // Imposta l'indirizzo IP e la porta del server a cui connettersi
     
-    // Connette il socket al server
-    //if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
-    int num_bytes = strlen(mib);
-    char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
-    int len = sprintf(bytes_str, "%s", mib);
-    char buffer[sizeof(int) * 3 + len];
-    memcpy(buffer, &enc, sizeof(int));
-    memcpy(buffer + sizeof(int), &temp, sizeof(int));
-    memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
-    memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
+    // zsock_t *socket = zsock_new_pub("ipc:///tmp/zmqtest");
+    // assert(socket);
+    // zsock_send(socket, "sss", "TOPIC", "MESSAGE PART", "ANOTHER");
+    
     fprintf(file, "%s",mib);
     fflush(file);
     fclose(file);

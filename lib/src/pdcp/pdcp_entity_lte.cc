@@ -25,6 +25,7 @@
 #include "srsran/common/standard_streams.h"
 #include "srsran/interfaces/ue_gw_interfaces.h"
 #include "srsran/interfaces/ue_rlc_interfaces.h"
+#include <czmq.h>
 #include <bitset>
 
 namespace srsran {
@@ -214,37 +215,43 @@ void pdcp_entity_lte::write_sdu(unique_byte_buffer_t sdu, int upper_sn)
   link = UPLINK;
   char *ue_env_var = getenv("UE_VAR");
   if (ue_env_var != NULL){
+    printf("Mando messsaggi al programma python: %d\n", socketfd);
+    // Allocazione della stringa
+    char* bytes_str = (char*)malloc(sizeof(char) * (2 * sdu->N_bytes + 3));
+
+    // Scrive i bytes nella stringa
+    int len = sprintf(bytes_str, "%s", "");
     
+    for(size_t i = 0; i < sdu->N_bytes; ++i) {
+      len += sprintf(bytes_str + len, "%02x", sdu->msg[i]);
+    }
+
+    //printf("%s\n", bytes_str);
+    // printf("%lu ---> ", sizeof(buffer));
+    // printf("%s\n", bytes_str);
+    //send(socketfd, buffer, sizeof(buffer), 0);
+    char buffer [10];
+    void *context = zmq_ctx_new();
+    void *requester = zmq_socket(context, ZMQ_REQ);
+    zmq_connect(requester, "ipc:///tmp/my_ipc_endpoint");
+    char uplink_rrc[strlen(bytes_str) + 32];
+    sprintf(uplink_rrc, "UPLINK_RRC:%s\n", bytes_str);
+    zmq_send(requester, uplink_rrc, strlen(uplink_rrc) + 1, 0);
+    zmq_recv (requester, buffer, 10, 0);
+    printf ("Received Ack\n");
+    zmq_close(requester);
+    zmq_ctx_destroy(context);
     //if (socketfd != -1){
     FILE* file = fopen("5g_connection.txt", "a");
     if (file != NULL){
-      printf("Mando messsaggi al programma python: %d\n", socketfd);
-      // Allocazione della stringa
-      char* bytes_str = (char*)malloc(sizeof(char) * (2 * sdu->N_bytes + 3));
-
-      // Scrive i bytes nella stringa
-      int len = sprintf(bytes_str, "%s", "");
       
-      for(size_t i = 0; i < sdu->N_bytes; ++i) {
-        len += sprintf(bytes_str + len, "%02x", sdu->msg[i]);
-      }
-
-      //printf("%s\n", bytes_str);
-
-      char buffer[sizeof(int) * 3 + strlen(bytes_str)];
-      memcpy(buffer, &enc, sizeof(int));
-      memcpy(buffer + sizeof(int), &link, sizeof(int));
-      memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
-      memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
-      // printf("%lu ---> ", sizeof(buffer));
-      // printf("%s\n", bytes_str);
-      //send(socketfd, buffer, sizeof(buffer), 0);
       fprintf(file, "UPLINK_RRC:%s\n", bytes_str);
       fflush(file);
       fclose(file);
-      free(bytes_str);
+      
       
     }
+    free(bytes_str);
 
   }
   
@@ -439,33 +446,41 @@ void pdcp_entity_lte::handle_srb_pdu(srsran::unique_byte_buffer_t pdu)
   link = DOWNLINK;
   char *ue_env_var = getenv("UE_VAR");
   if (ue_env_var != NULL){
-    FILE* file = fopen("5g_connection.txt", "a");
+    
     //if (socketfd != -1){
-    if (file != NULL){
-      printf("Mando messsaggi al programma python: %d\n", socketfd);
-      // Allocazione della stringa
-      char* bytes_str = (char*)malloc(sizeof(char) * (2 * pdu->N_bytes + 3));
+    printf("Mando messsaggi al programma python: %d\n", socketfd);
+    // Allocazione della stringa
+    char* bytes_str = (char*)malloc(sizeof(char) * (2 * pdu->N_bytes + 3));
 
-      // Scrive i bytes nella stringa
-      int len = sprintf(bytes_str, "%s", "");
-      for(size_t i = 0; i < pdu->N_bytes; ++i) {
-        len += sprintf(bytes_str + len, "%02x", pdu->msg[i]);
-      }
-      //printf("%s\n", bytes_str);
-      char buffer[sizeof(int) * 3 + strlen(bytes_str)];
-      memcpy(buffer, &enc, sizeof(int));
-      memcpy(buffer + sizeof(int), &link, sizeof(int));
-      memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
-      memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));    
+    // Scrive i bytes nella stringa
+    int len = sprintf(bytes_str, "%s", "");
+    for(size_t i = 0; i < pdu->N_bytes; ++i) {
+      len += sprintf(bytes_str + len, "%02x", pdu->msg[i]);
+    }  
+    char buffer [10];
+    void *context = zmq_ctx_new();
+    void *requester = zmq_socket(context, ZMQ_REQ);
+    zmq_connect(requester, "ipc:///tmp/my_ipc_endpoint");
+    char downlink_rrc[strlen(bytes_str) + 32];
+    sprintf(downlink_rrc, "DOWNLINK_RRC:%s\n", bytes_str);
+    zmq_send(requester, downlink_rrc, strlen(downlink_rrc) + 1, 0);
+    zmq_recv (requester, buffer, 10, 0);
+    printf ("Received Ack\n");
+    zmq_close(requester);
+    zmq_ctx_destroy(context);
+    FILE* file = fopen("5g_connection.txt", "a");
+    if (file != NULL){
       //send(socketfd, buffer, sizeof(buffer), 0);
+      
       fprintf(file, "DOWNLINK_RRC:%s\n", bytes_str);
       fflush(file);
       fclose(file);
       
       
 
-      free(bytes_str);
+      
     }
+    free(bytes_str);
     
   }
   

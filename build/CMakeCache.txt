@@ -58,8 +58,9 @@ CMAKE_ADDR2LINE:FILEPATH=/usr/bin/addr2line
 //Path to a program.
 CMAKE_AR:FILEPATH=/usr/bin/ar
 
-//No help, variable specified on the command line.
-CMAKE_BUILD_TYPE:STRING=Debug
+//Choose the type of build, options are: None Debug Release RelWithDebInfo
+// MinSizeRel ...
+CMAKE_BUILD_TYPE:STRING=
 
 //Enable/Disable color output during build.
 CMAKE_COLOR_MAKEFILE:BOOL=ON
@@ -134,8 +135,8 @@ CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=
 //Flags used by the linker during RELWITHDEBINFO builds.
 CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
-//No help, variable specified on the command line.
-CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
+//Enable/Disable output of compile commands during generation.
+CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=OFF
 
 //User executables (bin)
 CMAKE_INSTALL_BINDIR:PATH=bin
@@ -668,7 +669,7 @@ srsgnb_rrc_config_utils_LIB_DEPENDS:STATIC=general;srsran_phy;
 srslog_LIB_DEPENDS:STATIC=general;-lpthread;
 
 //Dependencies for the target
-srsran_common_LIB_DEPENDS:STATIC=general;srsran_phy;general;support;general;srslog;general;/usr/lib/x86_64-linux-gnu/libmbedcrypto.so;general;/usr/lib/x86_64-linux-gnu/libsctp.so;
+srsran_common_LIB_DEPENDS:STATIC=general;srsran_phy;general;support;general;srslog;general;/usr/lib/x86_64-linux-gnu/libmbedcrypto.so;
 
 //Dependencies for the target
 srsran_gtpu_LIB_DEPENDS:STATIC=general;srsran_common;general;srsran_asn1;
@@ -680,7 +681,7 @@ srsran_mac_LIB_DEPENDS:STATIC=general;srsran_common;
 srsran_pdcp_LIB_DEPENDS:STATIC=general;srsran_common;general;srsran_asn1;
 
 //Dependencies for the target
-srsran_phy_LIB_DEPENDS:STATIC=general;pthread;general;m;general;/usr/lib/x86_64-linux-gnu/libfftw3f.so;
+srsran_phy_LIB_DEPENDS:STATIC=general;pthread;general;m;general;/usr/lib/x86_64-linux-gnu/libfftw3f.so;general;zmq;
 
 //Dependencies for the target
 srsran_radio_LIB_DEPENDS:STATIC=general;srsran_rf;general;srsran_common;
@@ -704,7 +705,7 @@ srsue_mac_LIB_DEPENDS:STATIC=general;srsue_mac_common;
 srsue_mac_nr_LIB_DEPENDS:STATIC=general;srsue_mac_common;general;srsran_mac;
 
 //Dependencies for the target
-srsue_upper_LIB_DEPENDS:STATIC=general;srsran_asn1;general;nas_5g_msg;
+srsue_upper_LIB_DEPENDS:STATIC=general;srsran_asn1;general;zmq;general;nas_5g_msg;
 
 //Dependencies for the target
 system_LIB_DEPENDS:STATIC=general;-lpthread;
@@ -1039,6 +1040,10 @@ HAVE_SSE:INTERNAL=1
 HAVE_SSE_COMPILED:INTERNAL=TRUE
 //Result of TRY_RUN
 HAVE_SSE_EXITCODE:INTERNAL=0
+//Test HAVE_VISIBILITY_HIDDEN_C
+HAVE_VISIBILITY_HIDDEN_C:INTERNAL=1
+//Test HAVE_VISIBILITY_HIDDEN_CXX
+HAVE_VISIBILITY_HIDDEN_CXX:INTERNAL=1
 //Test HAVE_WNO_UNUSED_BUT_SET_VARIABLE
 HAVE_WNO_UNUSED_BUT_SET_VARIABLE:INTERNAL=1
 //ADVANCED property for variable: HGCOMMAND

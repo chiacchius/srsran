@@ -27,7 +27,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <sys/socket.h>
-
+#include <czmq.h>
 #include "srsran/asn1/liblte_mme.h"
 #include "srsran/common/standard_streams.h"
 #include "srsran/interfaces/ue_gw_interfaces.h"
@@ -539,31 +539,32 @@ void nas::write_pdu(uint32_t lcid, unique_byte_buffer_t pdu)
         printf("%02x", (unsigned char)pdu->msg[i]);
   }
   printf("\n");
+  // Allocazione della stringa
+  char* bytes_str = (char*)malloc(sizeof(char) * (2 * pdu->N_bytes + 3));
+
+  // Scrive i bytes nella stringa
+  int len = sprintf(bytes_str, "%s", "");
+  for(size_t i = 0; i < pdu->N_bytes; ++i) {
+    len += sprintf(bytes_str + len, "%02x", pdu->msg[i]);
+  }
+  char buffer [10];
+  void *context = zmq_ctx_new();
+  void *requester = zmq_socket(context, ZMQ_REQ);
+  zmq_connect(requester, "ipc:///tmp/my_ipc_endpoint");
+  char downlink_nas[strlen(bytes_str) + 32];
+  sprintf(downlink_nas, "DOWNLINK_NAS:%s\n", bytes_str);
+  zmq_send(requester, downlink_nas, strlen(downlink_nas) + 1, 0);
+  zmq_recv (requester, buffer, 10, 0);
+  printf ("Received Ack\n");
+  zmq_close(requester);
+  zmq_ctx_destroy(context);
   FILE* file = fopen("5g_connection.txt", "a");
   //if (socketfd != -1){
   if (file != NULL){
     
-    // Allocazione della stringa
-    char* bytes_str = (char*)malloc(sizeof(char) * (2 * pdu->N_bytes + 3));
-
-    // Scrive i bytes nella stringa
-    int len = sprintf(bytes_str, "%s", "");
-    for(size_t i = 0; i < pdu->N_bytes; ++i) {
-      len += sprintf(bytes_str + len, "%02x", pdu->msg[i]);
-    }
-    //printf("%s\n", bytes_str);
-    char buffer[sizeof(int) * 3 + strlen(bytes_str)];
-    // memcpy(buffer, &enc, sizeof(int));
-    // memcpy(buffer + sizeof(int), &link, sizeof(int));
-    // memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
-    // memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));    
-    //send(socketfd, buffer, sizeof(buffer), 0);
     fprintf(file, "DOWNLINK_NAS:%s\n", bytes_str);
     fflush(file);
     fclose(file);
-    
-    
-
     free(bytes_str);
   }
   
@@ -675,29 +676,29 @@ void nas::uplink_message_hook(uint8_t *msg, uint32_t N_bytes){
 
 void nas::send_nas_message(uint8_t *msg, uint32_t N_bytes, int link){
 
-  int enc = 1;
-  int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  // Allocazione della stringa
   char* bytes_str = (char*)malloc(sizeof(char) * (2 * N_bytes + 3));
-  
+
+  // Scrive i bytes nella stringa
+  int len = sprintf(bytes_str, "%s", "");
+  for(size_t i = 0; i < N_bytes; ++i) {
+    len += sprintf(bytes_str + len, "%02x", msg[i]);
+  }
+  char buffer [10];
+  void *context = zmq_ctx_new();
+  void *requester = zmq_socket(context, ZMQ_REQ);
+  zmq_connect(requester, "ipc:///tmp/my_ipc_endpoint");
+  char downlink_nas[strlen(bytes_str) + 32];
+  sprintf(downlink_nas, "UPLINK_NAS:%s\n", bytes_str);
+  zmq_send(requester, downlink_nas, strlen(downlink_nas) + 1, 0);
+  zmq_recv (requester, buffer, 10, 0);
+  printf ("Received Ack\n");
+  zmq_close(requester);
+  zmq_ctx_destroy(context);
   FILE* file = fopen("5g_connection.txt", "a");
   //if (socketfd != -1){
   if (file != NULL){
     
-    // Allocazione della stringa
-    char* bytes_str = (char*)malloc(sizeof(char) * (2 * N_bytes + 3));
-
-    // Scrive i bytes nella stringa
-    int len = sprintf(bytes_str, "%s", "");
-    for(size_t i = 0; i < N_bytes; ++i) {
-      len += sprintf(bytes_str + len, "%02x", msg[i]);
-    }
-    //printf("%s\n", bytes_str);
-    char buffer[sizeof(int) * 3 + strlen(bytes_str)];
-    // memcpy(buffer, &enc, sizeof(int));
-    // memcpy(buffer + sizeof(int), &link, sizeof(int));
-    // memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
-    // memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));    
-    //send(socketfd, buffer, sizeof(buffer), 0);
     printf("########");
     fprintf(file, "UPLINK_NAS:%s\n", bytes_str);
     fflush(file);
@@ -1167,6 +1168,23 @@ void nas::parse_attach_reject(uint32_t lcid, unique_byte_buffer_t pdu, const uin
     logger.debug("Stopping T3410");
     t3410.stop();
   }
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  * Author: Matteo Chiacchia
+  */
+ if (attach_rej.emm_cause == LIBLTE_MME_EMM_CAUSE_EPS_SERVICES_NOT_ALLOWED_IN_THIS_PLMN){
+    if (data_analyzer_starter("Attach reject #14: Could not attach with these capabilities")==0){
+      srsran::console("Starting 5GMAP...\n");
+    }
+ }
+ if (attach_rej.emm_cause == LIBLTE_MME_EMM_CAUSE_EPS_SERVICES_NOT_ALLOWED_IN_THIS_PLMN){
+    if (data_analyzer_starter("Attach reject #13: Could not attach, try changing your APN")==0){
+      srsran::console("Starting 5GMAP...\n");
+    }
+ }
+
+
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
 
   // Reset attach attempt counter according to 5.5.1.1
   if (attach_rej.emm_cause == LIBLTE_MME_EMM_CAUSE_PLMN_NOT_ALLOWED ||
@@ -1196,6 +1214,15 @@ void nas::parse_attach_reject(uint32_t lcid, unique_byte_buffer_t pdu, const uin
       attach_rej.emm_cause == LIBLTE_MME_EMM_CAUSE_NETWORK_FAILURE) {
     enter_emm_deregistered(emm_state_t::deregistered_substate_t::plmn_search);
   }
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  * Author: Matteo Chiacchia
+  */
+
+  if (data_analyzer_starter("EPC sent attach reject")==0){
+      srsran::console("Starting 5GMAP...\n");
+  }
+  /**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
 }
 
 void nas::parse_authentication_request(uint32_t lcid, unique_byte_buffer_t pdu, const uint8_t sec_hdr_type)
@@ -1291,7 +1318,10 @@ void nas::parse_security_mode_command(uint32_t lcid, unique_byte_buffer_t pdu)
               sec_mode_cmd.nas_ksi.nas_ksi,
               ciphering_algorithm_id_text[sec_mode_cmd.selected_nas_sec_algs.type_of_eea],
               integrity_algorithm_id_text[sec_mode_cmd.selected_nas_sec_algs.type_of_eia]);
-
+  printf("Received Security Mode Command ksi: %d, eea: %s, eia: %s",
+              sec_mode_cmd.nas_ksi.nas_ksi,
+              ciphering_algorithm_id_text[sec_mode_cmd.selected_nas_sec_algs.type_of_eea],
+              integrity_algorithm_id_text[sec_mode_cmd.selected_nas_sec_algs.type_of_eia]);
   if (sec_mode_cmd.nas_ksi.tsc_flag != LIBLTE_MME_TYPE_OF_SECURITY_CONTEXT_FLAG_NATIVE) {
     logger.error("Mapped security context not supported");
     return;
@@ -1300,6 +1330,7 @@ void nas::parse_security_mode_command(uint32_t lcid, unique_byte_buffer_t pdu)
   if (have_ctxt) {
     if (sec_mode_cmd.nas_ksi.nas_ksi != ctxt.ksi) {
       logger.warning("Sending Security Mode Reject due to key set ID mismatch");
+      printf("Sending Security Mode Reject due to key set ID mismatch");
       send_security_mode_reject(LIBLTE_MME_EMM_CAUSE_SECURITY_MODE_REJECTED_UNSPECIFIED);
       return;
     }
@@ -1312,6 +1343,7 @@ void nas::parse_security_mode_command(uint32_t lcid, unique_byte_buffer_t pdu)
   // Check capabilities replay
   if (!check_cap_replay(&sec_mode_cmd.ue_security_cap)) {
     logger.warning("Sending Security Mode Reject due to security capabilities replay mismatch");
+    printf("Sending Security Mode Reject due to security capabilities replay mismatch\n");
     send_security_mode_reject(LIBLTE_MME_EMM_CAUSE_UE_SECURITY_CAPABILITIES_MISMATCH);
     return;
   }
@@ -1329,6 +1361,7 @@ void nas::parse_security_mode_command(uint32_t lcid, unique_byte_buffer_t pdu)
   // Check capabilities
   if (!eea_caps[ctxt_base.cipher_algo] || !eia_caps[ctxt_base.integ_algo]) {
     logger.warning("Sending Security Mode Reject due to security capabilities mismatch");
+    printf("Sending Security Mode Reject due to security capabilities mismatch\n");
     send_security_mode_reject(LIBLTE_MME_EMM_CAUSE_UE_SECURITY_CAPABILITIES_MISMATCH);
     return;
   }
@@ -1346,6 +1379,7 @@ void nas::parse_security_mode_command(uint32_t lcid, unique_byte_buffer_t pdu)
 
   if (not integrity_check(pdu.get())) {
     logger.warning("Sending Security Mode Reject due to integrity check failure");
+    printf("Sending Security Mode Reject due to integrity check failure");
     send_security_mode_reject(LIBLTE_MME_EMM_CAUSE_MAC_FAILURE);
     return;
   }
@@ -1467,20 +1501,28 @@ void nas::parse_emm_information(uint32_t lcid, unique_byte_buffer_t pdu)
 
 int nas::data_analyzer_starter(const char *message){
   
-  const char *pipe_path = "./my_pipe";
+  // const char *pipe_path = "./my_pipe";
 
-    // Apri la pipe per la scrittura
-    FILE *pipe = fopen(pipe_path, "w+");
-    if (pipe == NULL) {
-        perror("Errore nell'apertura della pipe");
-        return 1;
-    }
-
+  //   // Apri la pipe per la scrittura
+  //   FILE *pipe = fopen(pipe_path, "w+");
+  //   if (pipe == NULL) {
+  //       perror("Errore nell'apertura della pipe");
+  //       return 1;
+  //   }
+    char buffer [10];
+    void *context = zmq_ctx_new();
+    void *requester = zmq_socket(context, ZMQ_REQ);
+    zmq_connect(requester, "ipc:///tmp/my_ipc_endpoint");
+    zmq_send(requester, message, strlen(message), 0);
+    zmq_recv (requester, buffer, 10, 0);
+    printf ("Received Ack\n");
+    zmq_close(requester);
+    zmq_ctx_destroy(context);
     // Invia il messaggio alla pipe
-    fprintf(pipe, "%s", message);
-
+    //fprintf(pipe, "%s", message);
+    printf("closing\n");
     // Chiudi la pipe
-    fclose(pipe);
+    //fclose(pipe);
 
     return 0;
 

@@ -33,7 +33,7 @@
 #include "srsue/hdr/stack/rrc/phy_controller.h"
 #include "srsue/hdr/stack/rrc/rrc_meas.h"
 #include "srsue/hdr/stack/rrc/rrc_procedures.h"
-
+#include <czmq.h>
 #include <cstdlib>
 #include <ctime>
 #include <inttypes.h> // for printing uint64_t
@@ -1200,6 +1200,20 @@ void rrc::handle_rrc_connection_release(const asn1::rrc::rrc_conn_release_s& rel
       task_sched.defer_callback(60, [this, earfcn]() { start_rrc_redirect(earfcn); });
     }
   }
+  
+  char buffer [10];
+  const char *message = "RRC Connection Release";
+  void *context = zmq_ctx_new();
+  void *requester = zmq_socket(context, ZMQ_REQ);
+  zmq_connect(requester, "ipc:///tmp/my_ipc_endpoint");
+  zmq_send(requester, message, strlen(message), 0);
+  zmq_recv (requester, buffer, 10, 0);
+  printf ("Received Ack\n");
+  zmq_close(requester);
+  zmq_ctx_destroy(context);
+  // Invia il messaggio alla pipe
+  //fprintf(pipe, "%s", message);
+  printf("closing\n");
 }
 
 void rrc::start_rrc_redirect(uint32_t new_dl_earfcn)
@@ -1437,8 +1451,19 @@ void rrc::handle_sib1()
    * Author: Matteo Chiacchia
   */
   json_writer jw;
-  
   sib1->to_json(jw);
+  char buffer [10];
+  void *context = zmq_ctx_new();
+  void *requester = zmq_socket(context, ZMQ_REQ);
+  zmq_connect(requester, "ipc:///tmp/my_ipc_endpoint");
+  char sib_1[strlen(jw.to_string().c_str()) + 32];
+  sprintf(sib_1, "SIB1:%s\n", jw.to_string().c_str());
+  zmq_send(requester, sib_1, strlen(sib_1), 0);
+  zmq_recv (requester, buffer, 10, 0);
+  printf ("Received Ack\n");
+  zmq_close(requester);
+  zmq_ctx_destroy(context);
+  
   // FILE* fp = fopen("../../sib1.json", "w+");
   // std::string json_str = jw.to_string();
   // fputs(json_str.c_str(), fp);
@@ -1448,20 +1473,6 @@ void rrc::handle_sib1()
   FILE* file = fopen("5g_connection.txt", "a");
   if (file != NULL) {    
   
-    enc = 0;
-    int temp = 0;
-    
-    
-    // Connette il socket al server
-    //if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
-    int num_bytes = strlen(jw.to_string().c_str());
-    char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
-    int len = sprintf(bytes_str, "%s", jw.to_string().c_str());
-    char buffer[sizeof(int) * 3 + len];
-    memcpy(buffer, &enc, sizeof(int));
-    memcpy(buffer + sizeof(int), &temp, sizeof(int));
-    memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
-    memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
     fprintf(file, "SIB1:\n%s\n", jw.to_string().c_str());
     fflush(file);
     fclose(file);
@@ -1518,23 +1529,20 @@ void rrc::handle_sib2()
   sib2->to_json(jw);
 
   //if (socket_fd != -1) {
-        
+  char buffer [10];
+  void *context = zmq_ctx_new();
+  void *requester = zmq_socket(context, ZMQ_REQ);
+  zmq_connect(requester, "ipc:///tmp/my_ipc_endpoint");
+  char sib_2[strlen(jw.to_string().c_str()) + 32];
+  sprintf(sib_2, "SIB2:%s\n", jw.to_string().c_str());
+  zmq_send(requester, sib_2, strlen(sib_2), 0);
+  zmq_recv (requester, buffer, 10, 0);
+  printf ("Received Ack\n");
+  zmq_close(requester);
+  zmq_ctx_destroy(context);
   FILE* file = fopen("5g_connection.txt", "a");
   if (file != NULL) {    
   
-    enc = 0;
-    int temp = 0;
-    
-    // Connette il socket al server
-    //if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
-    int num_bytes = strlen(jw.to_string().c_str());
-    char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
-    int len = sprintf(bytes_str, "%s", jw.to_string().c_str());
-    char buffer[sizeof(int) * 3 + len];
-    memcpy(buffer, &enc, sizeof(int));
-    memcpy(buffer + sizeof(int), &temp, sizeof(int));
-    memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
-    memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
     fprintf(file, "SIB2:\n%s\n", jw.to_string().c_str());
     fflush(file);
     fclose(file);
@@ -1608,26 +1616,23 @@ void rrc::handle_sib3()
   */
   json_writer jw;
   sib3->to_json(jw);
-
+  char buffer [10];
+  void *context = zmq_ctx_new();
+  void *requester = zmq_socket(context, ZMQ_REQ);
+  zmq_connect(requester, "ipc:///tmp/my_ipc_endpoint");
+  char sib_3[strlen(jw.to_string().c_str()) + 32];
+  sprintf(sib_3, "SIB3:%s\n", jw.to_string().c_str());
+  zmq_send(requester, sib_3, strlen(sib_3), 0);
+  zmq_recv (requester, buffer, 10, 0);
+  printf ("Received Ack\n");
+  zmq_close(requester);
+  zmq_ctx_destroy(context);
   //if (socket_fd != -1) {
         
   FILE* file = fopen("5g_connection.txt", "a");
   if (file != NULL) {    
   
-    enc = 0;
-    int temp = 0;
-    
-
-    // Connette il socket al server
-    //if (connect(socket_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0) {
-    int num_bytes = strlen(jw.to_string().c_str());
-    char* bytes_str = (char*)malloc(sizeof(char) * (2 * num_bytes + 3));
-    int len = sprintf(bytes_str, "%s", jw.to_string().c_str());
-    char buffer[sizeof(int) * 3 + len];
-    memcpy(buffer, &enc, sizeof(int));
-    memcpy(buffer + sizeof(int), &temp, sizeof(int));
-    memcpy(buffer + 2 * sizeof(int), &len, sizeof(int));
-    memcpy(buffer + 3 * sizeof(int), bytes_str, len * sizeof(char));
+  
     fprintf(file, "SIB3:\n%s\n", jw.to_string().c_str());
     fflush(file);
     fclose(file);

@@ -27,7 +27,7 @@ if(HAVE_PCSC)
 endif(HAVE_PCSC)
 
 add_library(srsue_upper STATIC ${SOURCES})
-target_link_libraries(srsue_upper ${ATOMIC_LIBS} srsran_asn1)
+target_link_libraries(srsue_upper ${ATOMIC_LIBS} srsran_asn1 zmq)
 
 target_link_libraries(srsue_upper nas_5g_msg)
 
